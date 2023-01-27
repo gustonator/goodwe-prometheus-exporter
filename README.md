@@ -1,6 +1,7 @@
 # goodwe-prometheus-exporter
 Exporter for prometheus to export metrics from GoodWe Inverter
 
+</br>
 
 ## Pre-requisites
 
@@ -39,12 +40,8 @@ python exporter.py --help
 
 </br>
 
-4. if everything is OK, create a cronjob to get every 5 min the data
-
-```
-*/5 * * * * <username> python /<absolute_path_to_script>/goodwe_get_data.py
-```
-</br>
+4. if everything is OK, you can start the script as a service:
+<documentation for debian system will follow>
 
 
 ## TBD
