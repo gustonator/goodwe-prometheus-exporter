@@ -1,7 +1,6 @@
 from prometheus_client import CollectorRegistry, Gauge, Counter, Info
 from datetime import datetime
 import prometheus_client as prometheus
-import os
 import sys
 import getopt
 import time
