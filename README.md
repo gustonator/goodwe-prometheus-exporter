@@ -2,6 +2,10 @@
 Exporter for prometheus to export metrics from GoodWe Inverter
 
 </br>
+tested on models:
+GoodWe GW10K-ET
+</br>
+
 
 ## Pre-requisites
 
