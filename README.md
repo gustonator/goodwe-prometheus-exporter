@@ -9,7 +9,7 @@ GoodWe GW10K-ET
 
 ## For standalone installation: 
 
-# Pre-requisites
+### Pre-requisites
 
 1. Installed python 3.8
 
@@ -21,7 +21,7 @@ python -m pip install goodwe asyncio prometheus_client
 ```
 </br>
 
-# Run/test
+### Run/test
 
 3. to test, start the exporter:
 ```
@@ -52,7 +52,7 @@ python exporter.py --help
 
 ## For Docker
 
-# Install/Run
+### Install/Run
 1. edit the docker-compose.yml file and put there the correct IP
 	(port and scrape interval are optional values)
 
@@ -63,7 +63,7 @@ docker compose up -d
 </br>
 
 
-#check
+### check
 
 3. get IP address of the container
 ```
