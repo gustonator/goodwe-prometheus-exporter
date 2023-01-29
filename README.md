@@ -7,7 +7,9 @@ GoodWe GW10K-ET
 </br>
 
 
-## Pre-requisites
+## For standalone installation: 
+
+# Pre-requisites
 
 1. Installed python 3.8
 
@@ -19,7 +21,7 @@ python -m pip install goodwe asyncio prometheus_client
 ```
 </br>
 
-## Run
+# Run/test
 
 3. to test, start the exporter:
 ```
@@ -48,7 +50,34 @@ python exporter.py --help
 <documentation for debian system will follow>
 
 
+## For Docker
+
+# Install/Run
+1. edit the docker-compose.yml file and put there the correct IP
+	(port and scrape interval are optional values)
+
+2. from command line run:
+```
+docker compose up -d 
+```
+</br>
+
+
+#check
+
+3. get IP address of the container
+```
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' goodwe-exporter
+```
+</br>
+
+4. check via curl to see,if exporter works metrics
+```
+curl http://<IP>:8787
+```
+</br>
+</br>
+
 ## TBD
 
-- creating docker image and docker-compose file
 - option to disable default python metrics

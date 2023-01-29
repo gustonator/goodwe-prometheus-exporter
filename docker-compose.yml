@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  goodwe-exporter:
+    container_name: goodwe-exporter
+    build: .
+    ports:
+      - 8787:8787
+    command:
+      - "--port=8787"
+      - "--interval=30"
+      - "--inverter=192.168.1.10"
+    networks:
+      - internal
+    restart: unless-stopped
+
+networks:
+  internal:
+    external: false
+    driver: bridge
+
