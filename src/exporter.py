@@ -16,17 +16,19 @@ def checkArgs(argv):
     global EXPORTER_PORT
     global POLLING_INTERVAL
     global INVERTER_IP
+    global ENERGY_PRICE
 
     # set default values
     EXPORTER_PORT = 8787
     POLLING_INTERVAL = 30
+    ENERGY_PRICE = 0.15
     INVERTER_IP = ""
 
     # help
-    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP>".format(argv[0])
+    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP> --energy-price <price per KWh in eur [default: 0.15>".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hp:t:i:", ["help", "port=", "interval=", "inverter="])
+        opts, args = getopt.getopt(argv[1:], "hp:t:i:", ["help", "port=", "interval=", "inverter=", "energy-price="])
     except:
         print(arg_help)
         sys.exit(2)
@@ -41,6 +43,8 @@ def checkArgs(argv):
             POLLING_INTERVAL = arg
         elif opt in ("-i", "--inverter"):
             INVERTER_IP = arg
+        elif opt in ("-e", "--energy-price"):
+            ENERGY_PRICE = arg
 
     # check if Inverter IP is set
     if not INVERTER_IP:
@@ -50,8 +54,9 @@ def checkArgs(argv):
 
 
 class InverterMetrics:
-    def __init__(self, g, i, POLLING_INTERVAL):
+    def __init__(self, g, i, POLLING_INTERVAL,ENERGY_PRICE):
         self.POLLING_INTERVAL = POLLING_INTERVAL
+        self.ENERGY_PRICE = ENERGY_PRICE
         self.metricsCount = 0
         self.g = g
         self.i = i
@@ -68,6 +73,9 @@ class InverterMetrics:
         
                 elif sensor.id_ in runtime_data and sensor.id_ != "timestamp" and type(runtime_data[sensor.id_]) != int:
                     self.i.append(Info(sensor.id_, sensor.name))
+
+            # add additional energy-price
+            self.g.append(Gauge("energy_price", "Energy price per KW"))
 
         asyncio.run(create_collector_registers())
 
@@ -93,7 +101,9 @@ class InverterMetrics:
                     self.g[countID].set(str(runtime_data[sensor.id_]))
                     countID+=1
 
-            self.metricsCount=len(self.g)-1
+            # set value for additional energy-price
+            self.g[countID].set(float(ENERGY_PRICE))
+            self.metricsCount=len(self.g)
 
         asyncio.run(fetch_inverter())
 
@@ -109,9 +119,11 @@ def main():
 
     print("polling interval:\t\t"+str(POLLING_INTERVAL)+"s")
     print("inverter scrape IP:\t\t"+str(INVERTER_IP))
+    print("energy price: \t\t\t"+str(ENERGY_PRICE)+"eur")
 
     inverter_metrics = InverterMetrics(
         POLLING_INTERVAL=int(POLLING_INTERVAL),
+        ENERGY_PRICE=ENERGY_PRICE,
         g=[],
         i=[]
     )
