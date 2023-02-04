@@ -17,7 +17,8 @@ GoodWe GW10K-ET
 
 2. install required  modules for python:
 ```
-python -m pip install goodwe asyncio prometheus_client
+python -m pip install asyncio prometheus_client
+pip install goodwe==0.2.23
 ```
 </br>
 
