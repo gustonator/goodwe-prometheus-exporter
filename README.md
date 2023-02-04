@@ -6,6 +6,15 @@ tested on models:
 GoodWe GW10K-ET
 </br>
 
+info: 
+It has been reported to work on GoodWe ET, EH, BT, BH, ES, EM, BP, DT, MS, D-NS, and XS families of inverters. It may work on other inverters as well, as long as they listen on UDP port 8899 and respond to one of supported communication protocols.
+The inverters communicate via UDP protocol, by default running on port 8899. They use a native 'AA55' protocol and (some models) ModBus protocol. ET inverters support both protocols, some inverters may not support both of them.
+
+(If you can't communicate with the inverter despite your model is listed above, it is possible you have old ARM firmware version. You should ask manufacturer support to upgrade your ARM firmware (not just inverter firmware) to be able to communicate with the inveter via UDP.)
+
+more info about the python goodwe library: https://github.com/marcelblijleven/goodwe
+
+</br>
 
 ## For standalone installation: 
 
