@@ -79,7 +79,7 @@ curl http://<IP>:8787
 
 ### Supported parameters
 
-`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `check_goodwe.py` script.
+`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `inverter_scan.py` script.
 `--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics
 `--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.
 `--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur )
