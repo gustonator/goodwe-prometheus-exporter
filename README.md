@@ -64,7 +64,7 @@ python exporter.py --help
 
 ### Install/Run
 1. edit the docker-compose.yml file and put there the correct IP
-	(port and scrape interval are optional values)
+	(other values are optional)
 
 2. from command line run:
 ```
@@ -86,8 +86,10 @@ docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' good
 curl http://<IP>:8787
 ```
 </br>
-</br>
 
-## TBD
+### Supported parameters
 
-- option to disable default python metrics
+`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `inverter_scan.py` script.
+`--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics
+`--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.
+`--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur )
