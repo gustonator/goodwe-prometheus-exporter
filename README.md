@@ -2,12 +2,8 @@
 Exporter for prometheus to export metrics from GoodWe Inverter
 
 </br>
-tested on models:
-GoodWe GW10K-ET
-</br>
 
-info: 
-It has been reported to work on GoodWe ET, EH, BT, BH, ES, EM, BP, DT, MS, D-NS, and XS families of inverters. It may work on other inverters as well, as long as they listen on UDP port 8899 and respond to one of supported communication protocols.
+This exporter should be working on GoodWe ET, EH, BT, BH, ES, EM, BP, DT, MS, and D-NS families of inverters. It may work on other inverters as well, as long as they listen on UDP port 8899 and respond to one of supported communication protocols. 
 The inverters communicate via UDP protocol, by default running on port 8899. They use a native 'AA55' protocol and (some models) ModBus protocol. ET inverters support both protocols, some inverters may not support both of them.
 
 (If you can't communicate with the inverter despite your model is listed above, it is possible you have old ARM firmware version. You should ask manufacturer support to upgrade your ARM firmware (not just inverter firmware) to be able to communicate with the inveter via UDP.)
@@ -58,6 +54,7 @@ python exporter.py --help
 
 4. if everything is OK, you can start the script as a service:
 <documentation for debian system will follow>
+</br>
 
 
 ## For Docker
@@ -89,7 +86,7 @@ curl http://<IP>:8787
 
 ### Supported parameters
 
-`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `inverter_scan.py` script.
-`--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics
-`--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.
-`--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur )
+`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `inverter_scan.py` script. </br>
+`--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics</br>
+`--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.</br>
+`--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur )</br>
