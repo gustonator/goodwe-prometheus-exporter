@@ -9,7 +9,7 @@ import urllib.request
 import asyncio
 import goodwe
 
-print("\nGOODWE DATA EXPORTER v1.0.0\n")
+print("\nGOODWE DATA EXPORTER v1.1.0\n")
 
 
 def checkArgs(argv):
