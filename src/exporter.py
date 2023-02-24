@@ -9,7 +9,7 @@ import urllib.request
 import asyncio
 import goodwe
 
-print("\nGOODWE DATA EXPORTER v1.1.0\n")
+print("\nGOODWE DATA EXPORTER v1.2.0\n")
 
 
 def checkArgs(argv):
@@ -17,18 +17,20 @@ def checkArgs(argv):
     global POLLING_INTERVAL
     global INVERTER_IP
     global ENERGY_PRICE
+    global PV_POWER
 
     # set default values
     EXPORTER_PORT = 8787
     POLLING_INTERVAL = 30
     ENERGY_PRICE = 0.15
+    PV_POWER = 5670
     INVERTER_IP = ""
 
     # help
-    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP> --energy-price <price per KWh in eur [default: 0.15>".format(argv[0])
+    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP> --energy-price <price per KWh in eur [default: 0.15]> --PVpower <maximum KW your PV can produce [default:5670]".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hp:t:i:", ["help", "port=", "interval=", "inverter=", "energy-price="])
+        opts, args = getopt.getopt(argv[1:], "hp:t:i:", ["help", "port=", "interval=", "inverter=", "energy-price=", "PVpower="])
     except:
         print(arg_help)
         sys.exit(2)
@@ -45,6 +47,9 @@ def checkArgs(argv):
             INVERTER_IP = arg
         elif opt in ("-e", "--energy-price"):
             ENERGY_PRICE = arg
+        elif opt in ("-w", "--PVpower"):
+            PV_POWER = arg
+
 
     # check if Inverter IP is set
     if not INVERTER_IP:
@@ -54,9 +59,10 @@ def checkArgs(argv):
 
 
 class InverterMetrics:
-    def __init__(self, g, i, POLLING_INTERVAL,ENERGY_PRICE):
+    def __init__(self, g, i, POLLING_INTERVAL,ENERGY_PRICE,PV_POWER):
         self.POLLING_INTERVAL = POLLING_INTERVAL
         self.ENERGY_PRICE = ENERGY_PRICE
+        self.PV_POWER = PV_POWER
         self.metricsCount = 0
         self.g = g
         self.i = i
@@ -76,6 +82,9 @@ class InverterMetrics:
 
             # add additional energy-price
             self.g.append(Gauge("energy_price", "Energy price per KW"))
+
+            # add additional PV Power
+            self.g.append(Gauge("pv_total_power", "Total power in WATTS, that can be produced by PV"))
 
         asyncio.run(create_collector_registers())
 
@@ -103,6 +112,7 @@ class InverterMetrics:
 
             # set value for additional energy-price
             self.g[countID].set(float(ENERGY_PRICE))
+            self.g[countID+1].set(float(PV_POWER))
             self.metricsCount=len(self.g)
 
         asyncio.run(fetch_inverter())
@@ -120,10 +130,12 @@ def main():
     print("polling interval:\t\t"+str(POLLING_INTERVAL)+"s")
     print("inverter scrape IP:\t\t"+str(INVERTER_IP))
     print("energy price: \t\t\t"+str(ENERGY_PRICE)+"eur")
+    print("total PV power: \t\t\t"+str(PV_POWER)+"W")
 
     inverter_metrics = InverterMetrics(
         POLLING_INTERVAL=int(POLLING_INTERVAL),
         ENERGY_PRICE=ENERGY_PRICE,
+        PV_POWER=PV_POWER,
         g=[],
         i=[]
     )
