@@ -29,13 +29,14 @@ pip install goodwe==0.2.23
 
 ### Run/test
 
-3. to test, start the exporter:
+3. to test, start the exporter with minimal configuration:
 ```
 python exporter.py --port <desired port> --interval <interval (s)> --inverter <inverterIP>
 
 ie.
 python exporter.py --port 8787 --interval 30 --inverter 192.168.2.35
 ```
+(for more settings, see parameters below)
 </br>
 
 now you can call it via curl to see,if it exports some metrics:
@@ -86,7 +87,9 @@ curl http://<IP>:8787
 
 ### Supported parameters
 
-`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the `inverter_scan.py` script. </br>
+`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the 'inverter_scan.py' script. </br>
 `--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics</br>
 `--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.</br>
-`--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur )</br>
+`--energy-price <value>` 	- [optional][default: 0.15] energy price per kwh (in eur). If '--scrape-spot-price' is set to true, '--energy-price' value is ignored</br>
+`--PVpower <value>`		- [optional][default: 5670] maximum power in Watts of your PV you can generate (ie. 5670 = 5670W)</br>
+`--scrape-spot-price <bool>`	- [optional][default: False] True/False, if the exporter should scrape spot price from https://www.ote-cr.cz. If it's set to 'True', exporter will set spot_price as the energy price</br>

@@ -10,6 +10,9 @@ services:
       - "--port=8787"
       - "--interval=30"
       - "--inverter=192.168.1.10"
+      - "--energy-price=0.15"
+      - "--PVpower=5.67"
+      - "--scrape-spot-price=False"
     networks:
       - internal
     restart: unless-stopped

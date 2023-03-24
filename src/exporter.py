@@ -1,15 +1,37 @@
 from prometheus_client import CollectorRegistry, Gauge, Counter, Info
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 import prometheus_client as prometheus
+import xml.etree.ElementTree as ET
+import logging
 import sys
 import getopt
 import time
-import socket
-import urllib.request
 import asyncio
+import aiohttp
 import goodwe
 
-print("\nGOODWE DATA EXPORTER v1.2.0\n")
+#logger = logging.getLogger(__name__)
+
+print("\nGOODWE DATA EXPORTER v1.3.0\n")
+
+QUERY = '''<?xml version="1.0" encoding="UTF-8" ?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:pub="http://www.ote-cr.cz/schema/service/public">
+    <soapenv:Header/>
+    <soapenv:Body>                                                                          
+        <pub:GetDamPriceE>
+            <pub:StartDate>{start}</pub:StartDate>
+            <pub:EndDate>{end}</pub:EndDate>
+            <pub:InEur>{in_eur}</pub:InEur>
+        </pub:GetDamPriceE>
+    </soapenv:Body>
+</soapenv:Envelope>
+'''
+class OTEFault(Exception):
+    pass
+
+class InvalidFormat(OTEFault):
+    pass
 
 
 def checkArgs(argv):
@@ -18,19 +40,21 @@ def checkArgs(argv):
     global INVERTER_IP
     global ENERGY_PRICE
     global PV_POWER
+    global SCRAPE_SPOT_PRICE
 
     # set default values
     EXPORTER_PORT = 8787
     POLLING_INTERVAL = 30
-    ENERGY_PRICE = 0.15
+    ENERGY_PRICE = 0
     PV_POWER = 5670
     INVERTER_IP = ""
+    SCRAPE_SPOT_PRICE = False
 
     # help
-    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP> --energy-price <price per KWh in eur [default: 0.15]> --PVpower <maximum KW your PV can produce [default:5670]".format(argv[0])
+    arg_help = "{0} --port <exporter port [default:8787]> --interval <scrape interval (seconds) [default:30]> --inverter <inverter IP> --energy-price <price per KWh in eur [default: 0]> --PVpower <maximum KW your PV can produce [default:5670] --scrape-spot-price <True/False> [default: False] ".format(argv[0])
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hp:t:i:", ["help", "port=", "interval=", "inverter=", "energy-price=", "PVpower="])
+        opts, args = getopt.getopt(argv[1:], "hp:t:i:s:", ["help", "port=", "interval=", "inverter=", "energy-price=", "PVpower=", "scrape-spot-price="])
     except:
         print(arg_help)
         sys.exit(2)
@@ -40,7 +64,7 @@ def checkArgs(argv):
             print(arg_help)
             sys.exit(2)
         elif opt in ("-p", "--port"):
-             EXPORTER_PORT= arg
+            EXPORTER_PORT= arg
         elif opt in ("-t", "--interval"):
             POLLING_INTERVAL = arg
         elif opt in ("-i", "--inverter"):
@@ -49,23 +73,51 @@ def checkArgs(argv):
             ENERGY_PRICE = arg
         elif opt in ("-w", "--PVpower"):
             PV_POWER = arg
-
+        elif opt in ("-s", "--scrape-spot-price"):
+            if arg.lower() == 'false':
+                SCRAPE_SPOT_PRICE = False
+            else:
+                SCRAPE_SPOT_PRICE = True
 
     # check if Inverter IP is set
     if not INVERTER_IP:
-        print("ERROR: missing IP Address of inverter!")
-        exit(1)
-                
-
+        print("ERROR: missing IP Address of inverter!\n")
+        print(arg_help)
+        sys.exit(2)
 
 class InverterMetrics:
-    def __init__(self, g, i, POLLING_INTERVAL,ENERGY_PRICE,PV_POWER):
+    ELECTRICITY_PRICE_URL = 'https://www.ote-cr.cz/services/PublicDataService'
+
+    # build the query - fill the variables
+    def get_query(self, start: date, end: date, in_eur: bool) -> str:
+        return QUERY.format(start=start.isoformat(), end=end.isoformat(), in_eur='true' if in_eur else 'false')
+
+    # download data from web
+    async def _download(self, query: str) -> str:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.ELECTRICITY_PRICE_URL, data=query) as response:
+                return await response.text()
+
+    def parse_spot_data(self, xmlResponse):
+        root = ET.fromstring(xmlResponse)
+        for item in root.findall('.//{http://www.ote-cr.cz/schema/service/public}Item'):
+            hour_el = item.find('{http://www.ote-cr.cz/schema/service/public}Hour')
+            price_el = item.find('{http://www.ote-cr.cz/schema/service/public}Price')
+            current_hour = datetime.now().hour
+
+            if (int(hour_el.text) - 1) == current_hour:
+                price_el = Decimal(price_el.text)
+                price_el /= Decimal(1000) #convert MWh -> KWh
+                return price_el
+        
+    def __init__(self, POLLING_INTERVAL,ENERGY_PRICE,PV_POWER,SCRAPE_SPOT_PRICE):
         self.POLLING_INTERVAL = POLLING_INTERVAL
         self.ENERGY_PRICE = ENERGY_PRICE
         self.PV_POWER = PV_POWER
+        self.SCRAPE_SPOT_PRICE = SCRAPE_SPOT_PRICE
         self.metricsCount = 0
-        self.g = g
-        self.i = i
+        self.g = []
+        self.i = []
     
     # create placeholder for metrics in the register
     def collector_register(self):
@@ -85,9 +137,8 @@ class InverterMetrics:
 
             # add additional PV Power
             self.g.append(Gauge("pv_total_power", "Total power in WATTS, that can be produced by PV"))
-
+            
         asyncio.run(create_collector_registers())
-
 
     # scrape loop
     def run_metrics_loop(self):
@@ -96,10 +147,16 @@ class InverterMetrics:
             self.fetch_data()
             time.sleep(self.POLLING_INTERVAL)
 
-
     # scrape metrics in a loop and write to the prepared metrics register
     def fetch_data(self):
         self.metricsCount = 0
+        
+        # get spot prices
+        if self.SCRAPE_SPOT_PRICE:
+            query = self.get_query(date.today(), date.today(), in_eur=True)
+            xmlResponse = asyncio.run(self._download(query))
+            self.ENERGY_PRICE = self.parse_spot_data(xmlResponse)
+        
         async def fetch_inverter():
             inverter = await goodwe.connect(INVERTER_IP)
             runtime_data = await inverter.read_runtime_data()
@@ -111,17 +168,20 @@ class InverterMetrics:
                     countID+=1
 
             # set value for additional energy-price
-            self.g[countID].set(float(ENERGY_PRICE))
+            self.g[countID].set(float(self.ENERGY_PRICE))
             self.g[countID+1].set(float(PV_POWER))
             self.metricsCount=len(self.g)
 
         asyncio.run(fetch_inverter())
 
         # print number of metrics and date and rewrites it every time
+        print('-------------------------------------------------------')
+        if self.SCRAPE_SPOT_PRICE:
+            print("energy price(spot):\t\t"+str(self.ENERGY_PRICE)+" eur/KW")
+        else:
+            print("energy price (fixed):\t\t"+str(self.ENERGY_PRICE)+" eur/KW")
         print("number of metrics:\t\t"+str(self.metricsCount))
-        print("last scrape:\t\t\t"+ str(datetime.now().strftime("%d.%m.%Y %H:%M:%S")), end='\r')
-        print('\033[1A', end='\x1b[2K')
-
+        print("last scrape:\t\t\t"+ str(datetime.now().strftime("%d.%m.%Y %H:%M:%S")))
 
 
 def main():
@@ -129,15 +189,14 @@ def main():
 
     print("polling interval:\t\t"+str(POLLING_INTERVAL)+"s")
     print("inverter scrape IP:\t\t"+str(INVERTER_IP))
-    print("energy price: \t\t\t"+str(ENERGY_PRICE)+"eur")
-    print("total PV power: \t\t\t"+str(PV_POWER)+"W")
+    print("fixed energy price: \t\t"+str(ENERGY_PRICE)+" eur/KW")
+    print("total PV power: \t\t"+str(PV_POWER)+"W")
 
     inverter_metrics = InverterMetrics(
         POLLING_INTERVAL=int(POLLING_INTERVAL),
         ENERGY_PRICE=ENERGY_PRICE,
         PV_POWER=PV_POWER,
-        g=[],
-        i=[]
+        SCRAPE_SPOT_PRICE=SCRAPE_SPOT_PRICE
     )
 
     # Start the server to expose metrics.
