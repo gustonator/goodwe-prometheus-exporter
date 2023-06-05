@@ -93,3 +93,4 @@ curl http://<IP>:8787
 `--energy-price <value>` 	- [optional][default: 0] energy price per kwh (in eur). If '--scrape-spot-price' is set to true, '--energy-price' value is ignored</br>
 `--PVpower <value>`		- [optional][default: 5670] maximum power in Watts of your PV you can generate (ie. 5670 = 5670W)</br>
 `--scrape-spot-price <bool>`	- [optional][default: False] True/False, if the exporter should scrape spot price from https://www.ote-cr.cz. If it's set to 'True', exporter will set spot_price as the energy price</br>
+`--spot-scrape-interval <time>` - [optional][default: 30] (in minutes) scrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests 
