@@ -4,7 +4,7 @@ import goodwe
 
 async def get_runtime_data():
     #ip_address = '2a00:1028:c000:fdb:730b:1770:8783:6eac'
-    ip_address = '5.181.93.153'
+    ip_address = '192.168.2.35'
 
     inverter = await goodwe.connect(ip_address)
     runtime_data = await inverter.read_runtime_data()
