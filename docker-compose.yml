@@ -11,7 +11,7 @@ services:
       - "--interval=30"
       - "--inverter=192.168.1.10"
       - "--energy-price=0.15"
-      - "--PVpower=5.67"
+      - "--PVpower=5670"
       - "--scrape-spot-price=False"
     networks:
       - internal
