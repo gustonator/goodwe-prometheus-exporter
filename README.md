@@ -11,6 +11,7 @@ The inverters communicate via UDP protocol, by default running on port 8899. The
 more info about the python goodwe library: https://github.com/marcelblijleven/goodwe
 
 </br>
+
 ### Pre-requisites
 
 1. Installed python 3.8
@@ -40,18 +41,17 @@ python3.8 --version
 python -m pip install asyncio prometheus_client
 pip install goodwe==0.2.23
 ```
-
 </br>
 
 ### How to get the IP Address of the inverter
-note: the inverter must be on the same network
+*note: the inverter must be on the same network*
 
 To get the IP adress of the inverter, run:
 ```
 python scripts/inverter_scan.py
 ```
 
-you will see something like: 
+you will see something like:</br> 
 `Located inverter at IP: 192.168.2.35, mac: 289C6E05xxxx, name: Solar-WiFi222W0782`
 </br>
 
@@ -65,14 +65,14 @@ python scripts/get-inverter-data.py
 
 and you should get all the data your inverter is exposing
 
-</br>
+</br></br>
 
 ## For standalone installation
 
 check that you have:
 - installed python
 - installed goodwe modules
-(see Pre-requisites)
+(see [Pre-requisites](https://github.com/gustonator/goodwe-prometheus-exporter#Pre-requisites) )
 </br>
 
 ### Run/test
@@ -84,11 +84,11 @@ python src/exporter.py --port <desired port> --interval <interval (s)> --inverte
 ie.
 python src/exporter.py --port 8787 --interval 30 --inverter 192.168.2.35
 ```
-(for more settings, see parameters at the end of the README)
+(for more settings, see [Supported parameters](https://github.com/gustonator/goodwe-prometheus-exporter#supported-parameters))
 
 </br>
 
-now you can call it via curl (from another terminal) to see,if it exports some metrics:
+now you can call it via curl (from another terminal) to see, if it exports some metrics:
 (run in a new tab)
 ```
 curl http://127.0.0.1:8787
@@ -112,9 +112,8 @@ For Ubuntu:
 ## For Docker Installation
 
 check that you have:
-- installed python (need for the script to get the IP adress)
-- Installed docker compose (see: https://docs.docker.com.zh.xy2401.com/v17.12/compose/install/)
-(see Pre-requisites)
+- installed python (need for the script to get the IP adress)(see [Pre-requisites](https://github.com/gustonator/goodwe-prometheus-exporter#Pre-requisites))
+- Installed docker compose ([Docker compose installation](https://docs.docker.com.zh.xy2401.com/v17.12/compose/install/))
 </br>
 
 
@@ -145,12 +144,12 @@ curl http://<IP>:8787
 
 ### Supported parameters
 
-`--inverter <inverterIP>`	- [required] IP address of the iverter. To get the IP Address, you can run the 'inverter_scan.py' script. </br>
+`--inverter <inverterIP>`	- [required] IP address of the inverter. To get the IP Address, see section [How to get the inverter IP address](https://github.com/gustonator/goodwe-prometheus-exporter#how-to-get-the-ip-address-of-the-inverter). </br>
 `--port <desired port>`		- [optional][default: 8787] port, on which the exporter should expose the metrics</br>
-`--interval <interval (s)>`	- [optional][default: 30] interval between scrapings in seconds.</br>
+`--interval <seconds>`		- [optional][default: 30] interval between scrapings (in seconds).</br>
 `--energy-price <value>` 	- [optional][default: 0] energy price per kwh (in eur). If '--scrape-spot-price' is set to true, '--energy-price' value is ignored</br>
-`--PVpower <value>`		- [optional][default: 5670] maximum power in Watts of your PV you can generate (ie. 5670 = 5670W)</br>
-`--scrape-spot-price <bool>`	- [optional][default: False] True/False, if the exporter should scrape spot price from https://www.ote-cr.cz. If it's set to 'True', exporter will set spot_price as the energy price</br>
-`--spot-scrape-interval <time>` - [optional][default: 30] (in minutes) scrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests</br></br>
+`--PVpower <value>`		- [optional][default: 5670] maximum power in Watts of your PV you can generate (ie. 5670 = 5.67 KW)</br>
+`--scrape-spot-price <bool>`	- [optional][default: False] True/False, if the exporter should scrape spot price from https://www.ote-cr.cz. If it's set to 'True', exporter will set the scraped spot price as the energy price (--energy-price is ignored)</br>
+`--spot-scrape-interval <minutes>` - [optional][default: 30] (in minutes) scrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests</br></br>
 
 
