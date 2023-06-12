@@ -11,14 +11,14 @@ from goodwe.protocol import ProtocolCommand
 logging.basicConfig(
     format="%(asctime)-15s %(funcName)s(%(lineno)d) - %(levelname)s: %(message)s",
     stream=sys.stderr,
-    level=getattr(logging, "DEBUG", None),
+    level=getattr(logging, "INFO", None),
 )
 
 
 def try_command(command, ip):
     print(f"Trying command: {command}")
     try:
-        response = asyncio.run(ProtocolCommand(bytes.fromhex(command), lambda x: True).execute(result[0]))
+        response = asyncio.run(ProtocolCommand(bytes.fromhex(command), lambda x: True).execute(result[0], timeout=2, retries=0))
         print(f"Response to {command} command: {response.hex()}")
     except InverterError as err:
         print(f"No response to {command} command")
@@ -59,7 +59,7 @@ try_command(omnik_command(sn), result[0])
 sn = "".join(reversed([sn[i:i + 2] for i in range(0, len(sn), 2)]))
 try_command(omnik_command(sn), result[0])
 
-print(f"Identifying inverter at IP: {result[0]}")
+print(f"\n\nIdentifying inverter at IP: {result[0]}, name: {result[2]} mac: {result[1]}")
 inverter = asyncio.run(goodwe.discover(result[0]))
 print(
     f"Identified inverter model: {inverter.model_name}, serialNr: {inverter.serial_number}"
