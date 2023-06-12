@@ -39,7 +39,7 @@ python3.8 --version
 2. install required  modules for python:
 ```
 python -m pip install asyncio prometheus_client
-pip install goodwe==0.2.23
+pip install goodwe==0.2.31
 ```
 </br>
 
