@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 import prometheus_client as prometheus
 import xml.etree.ElementTree as ET
+import traceback
 import logging
 import sys
 import getopt
@@ -55,7 +56,7 @@ def checkArgs(argv):
     LAST_SPOT_UPDATE = None
 
     # help
-    arg_help = "\nREQUIRED PARAMETERS::\n\t-i, --inverter\n\t\tIP adress of the inverter\n\nOPTIONAL PARAMETERS:\n\t-h, --help \n\t\tShows this menu\n\t-p, --port \n\t\texporter port - on which port should the exporter expose data [default:8787]\n\t-t, --interval\n\t\tscrape interval (in seconds) [default:30] \n\t-e. --energy-price \n\t\tprice per KWh in eur [default: 0.20] \n\t-w, --PVpower \n\t\tmaximum KW your PV can produce [default:5670] \n\t-s, --scrape-spot-price \n\t\t[True/False] Set to True, for scraping  spot prices from www.ote-cr.cz [default: False] \n\t-x,--spot-scrape-interval \n\t\tscrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests (in minutes) [default:30] ".format(argv[0])
+    arg_help = "\nREQUIRED PARAMETERS::\n\t-i, --inverter\n\t\tIP adress of the inverter\n\nOPTIONAL PARAMETERS:\n\t-h, --help \n\t\tShows this menu\n\t-p, --port \n\t\texporter port - on which port should the exporter expose data [default:8787]\n\t-t, --interval\n\t\tscrape interval (in seconds) [default:30] \n\t-e. --energy-price \n\t\tprice per KWh in eur [default: 0.20] \n\t-w, --PVpower \n\t\tmaximum KW your PV can produce [default:5670] \n\t-s, --scrape-spot-price \n\t\t[True/False] Set to True, for scraping  spot prices from www.ote-cr.cz [default: False] \n\t-x, --spot-scrape-interval \n\t\tscrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests (in minutes) [default:30] ".format(argv[0])
 
     try:
         opts, args = getopt.getopt(argv[1:], "hp:t:i:s:", ["help", "port=", "interval=", "inverter=", "energy-price=", "PVpower=", "scrape-spot-price=", "spot-scrape-interval="])
@@ -201,33 +202,48 @@ class InverterMetrics:
 
 
 def main():
-    checkArgs(sys.argv)
+    try:
+         # Set up logging
+        logging.basicConfig(filename='exporter.log', level=logging.WARNING, format='%(asctime)s %(name)-14s %(levelname)-10s %(message)s', filemode='a')
 
-    print("polling interval:\t\t"+str(POLLING_INTERVAL)+"s")
-    print("inverter scrape IP:\t\t"+str(INVERTER_IP))
-    print("total PV power: \t\t"+str(PV_POWER)+"W")
-    if SCRAPE_SPOT_PRICE:
-        print("spot price scrape: \t\tEnabled")
-        print("spot price scrape interval: \t"+str(SPOT_SCRAPE_INTERVAL)+" min")
-    else:
-        print("spot price scrape: \t\tDisabled")
-        print("fixed energy price: \t\t"+str(ENERGY_PRICE)+" eur/KW")
+        checkArgs(sys.argv)
 
-    inverter_metrics = InverterMetrics(
-        POLLING_INTERVAL=int(POLLING_INTERVAL),
-        ENERGY_PRICE=ENERGY_PRICE,
-        PV_POWER=PV_POWER,
-        SCRAPE_SPOT_PRICE=SCRAPE_SPOT_PRICE,
-        SPOT_SCRAPE_INTERVAL=SPOT_SCRAPE_INTERVAL,
-        LAST_SPOT_UPDATE=LAST_SPOT_UPDATE
-    )
+        print("polling interval:\t\t"+str(POLLING_INTERVAL)+"s")
+        print("inverter scrape IP:\t\t"+str(INVERTER_IP))
+        print("total PV power: \t\t"+str(PV_POWER)+"W")
+        if SCRAPE_SPOT_PRICE:
+            print("spot price scrape: \t\tEnabled")
+            print("spot price scrape interval: \t"+str(SPOT_SCRAPE_INTERVAL)+" min")
+        else:
+            print("spot price scrape: \t\tDisabled")
+            print("fixed energy price: \t\t"+str(ENERGY_PRICE)+" eur/KW")
 
-    # Start the server to expose metrics.
-    prometheus.start_http_server(int(EXPORTER_PORT))
-    print("exporter started on port:\t"+str(EXPORTER_PORT)+"\n")
+        inverter_metrics = InverterMetrics(
+            POLLING_INTERVAL=int(POLLING_INTERVAL),
+            ENERGY_PRICE=ENERGY_PRICE,
+            PV_POWER=PV_POWER,
+            SCRAPE_SPOT_PRICE=SCRAPE_SPOT_PRICE,
+            SPOT_SCRAPE_INTERVAL=SPOT_SCRAPE_INTERVAL,
+            LAST_SPOT_UPDATE=LAST_SPOT_UPDATE
+        )
 
-    inverter_metrics.run_metrics_loop()
+        # Start the server to expose metrics.
+        prometheus.start_http_server(int(EXPORTER_PORT))
+        print("exporter started on port:\t"+str(EXPORTER_PORT)+"\n")
+
+        inverter_metrics.run_metrics_loop()
+
+    except KeyboardInterrupt:
+        key_message='Manually interrupted by keyboard'
+        print("\n"+key_message+"\n")
+        logging.warning(key_message)
+
+    except Exception  as e:
+        logging.error("An error occurred: %s", e)
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
-    main()
+        main()
+    
+

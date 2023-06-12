@@ -14,7 +14,7 @@ more info about the python goodwe library: https://github.com/marcelblijleven/go
 
 ### Pre-requisites
 
-1. Installed python 3.8
+1. Installed python (tested with python 3.8, 3.9, 3.10)
 
 for Ubuntu:
 ```
@@ -38,8 +38,7 @@ python3.8 --version
 
 2. install required  modules for python:
 ```
-python -m pip install asyncio prometheus_client
-pip install goodwe==0.2.31
+python -m pip install asyncio prometheus_client goodwe
 ```
 </br>
 
