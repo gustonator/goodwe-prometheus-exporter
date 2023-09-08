@@ -15,7 +15,7 @@ more info about the python goodwe library: https://github.com/marcelblijleven/go
 ### Pre-requisites
 1. Configured inverter:
 Inverter must be connected to a 2.4GHz wifi network (if you have a wifi module)
-If not, you can configure it following:
+If not, you can configure it following:</br>
   1.1 Connect to a wifi network called `Solar-Wifi` or `AP-xxxxxx` (default password is `12345678`)</br>
   1.2 Open your browser and go to http://10.10.100.253 or http://10.10.100.254</br>
   1.3 enter `admin` as username, and `admin` as password</br>
