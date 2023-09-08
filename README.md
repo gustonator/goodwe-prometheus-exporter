@@ -13,8 +13,17 @@ more info about the python goodwe library: https://github.com/marcelblijleven/go
 </br>
 
 ### Pre-requisites
+1. Configured inverter:
+Inverter must be connected to a 2.4GHz wifi network (if you have a wifi module)
+If not, you can configure it following:
+  1.1 Connect to a wifi network called `Solar-Wifi` or `AP-xxxxxx` (default password is `12345678`)
+  1.2 Open your browser and go to http://10.10.100.253 or http://10.10.100.254
+  1.3 enter `admin` as username, and `admin` as password
+  1.4 Click `Start setup`, and select router's SSID (must be a 2.4GHz network) and it's password
+  1.5 click `complete` to finish the setup process
+</br>
 
-1. Installed python (tested with python 3.8, 3.9, 3.10)
+2. Installed python (tested with python 3.8, 3.9, 3.10):
 
 for Ubuntu:
 ```
@@ -36,7 +45,8 @@ python3.8 --version
 
 </br>
 
-2. install required  modules for python:
+
+3. installed required  modules for python:
 ```
 python -m pip install asyncio prometheus_client goodwe
 ```
