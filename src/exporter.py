@@ -52,8 +52,8 @@ def checkArgs(argv):
     PV_POWER = 5670
     INVERTER_IP = ""
     SCRAPE_SPOT_PRICE = False
-    SPOT_SCRAPE_INTERVAL = 30
-    LAST_SPOT_UPDATE = None
+    SPOT_SCRAPE_INTERVAL = timedelta(minutes=int(30))
+    LAST_SPOT_UPDATE = datetime.now() - SPOT_SCRAPE_INTERVAL
 
     # help
     arg_help = "\nREQUIRED PARAMETERS::\n\t-i, --inverter\n\t\tIP adress of the inverter\n\nOPTIONAL PARAMETERS:\n\t-h, --help \n\t\tShows this menu\n\t-p, --port \n\t\texporter port - on which port should the exporter expose data [default:8787]\n\t-t, --interval\n\t\tscrape interval (in seconds) [default:30] \n\t-e. --energy-price \n\t\tprice per KWh in eur [default: 0.20] \n\t-w, --PVpower \n\t\tmaximum KW your PV can produce [default:5670] \n\t-s, --scrape-spot-price \n\t\t[True/False] Set to True, for scraping  spot prices from www.ote-cr.cz [default: False] \n\t-x, --spot-scrape-interval \n\t\tscrape interval of spot prices. If you set it too low, ote-cr.cz will block your requests (in minutes) [default:30] ".format(argv[0])
@@ -79,10 +79,7 @@ def checkArgs(argv):
         elif opt in ("-w", "--PVpower"):
             PV_POWER = arg
         elif opt in ("-s", "--scrape-spot-price"):
-            if arg.lower() == 'false':
-                SCRAPE_SPOT_PRICE = False
-            else:
-                SCRAPE_SPOT_PRICE = True
+            SCRAPE_SPOT_PRICE = True
         elif opt in ("-x", "--spot-scrape-interval"):
             # define time for spot price scrape interval
             SPOT_SCRAPE_INTERVAL = timedelta(minutes=int(arg))
@@ -96,7 +93,7 @@ def checkArgs(argv):
         sys.exit(2)
 
 class InverterMetrics:
-    ELECTRICITY_PRICE_URL = 'https://www.ote-cr.cz/services/PublicDataService'
+    ELECTRICITY_PRICE_URL = 'https://www.ote-cr.cz/services/PublicDataService' #deleted "e"
 
     # build the query - fill the variables
     def get_query(self, start: date, end: date, in_eur: bool) -> str:
