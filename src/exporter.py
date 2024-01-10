@@ -101,9 +101,13 @@ class InverterMetrics:
 
     # download data from web
     async def _download(self, query: str) -> str:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.ELECTRICITY_PRICE_URL, data=query) as response:
-                return await response.text()
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get('https://www.ote-cr.cz') as response:
+                    async with session.post(self.ELECTRICITY_PRICE_URL, data=query) as response:
+                        return await response.text()
+        except aiohttp.ClientConnectorError as e:
+            print(f"SSL error occurred: {e}")
 
     def parse_spot_data(self, xmlResponse):
         root = ET.fromstring(xmlResponse)
