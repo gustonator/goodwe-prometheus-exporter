@@ -14,7 +14,7 @@ import goodwe
 
 #logger = logging.getLogger(__name__)
 
-print("\nGOODWE DATA EXPORTER v1.4.2\n")
+print("\nGOODWE DATA EXPORTER v1.4.3\n")
 
 QUERY = '''<?xml version="1.0" encoding="UTF-8" ?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:pub="http://www.ote-cr.cz/schema/service/public">
