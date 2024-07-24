@@ -14,7 +14,7 @@ import goodwe
 
 #logger = logging.getLogger(__name__)
 
-print("\nGOODWE DATA EXPORTER v1.4.3\n")
+print("\nGOODWE DATA EXPORTER v1.4.4\n")
 
 QUERY = '''<?xml version="1.0" encoding="UTF-8" ?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:pub="http://www.ote-cr.cz/schema/service/public">
@@ -43,7 +43,7 @@ def checkArgs(argv):
     global PV_POWER
     global SCRAPE_SPOT_PRICE
     global SPOT_SCRAPE_INTERVAL
-    global LAST_SPOT_UPDATE
+    global LAST_SPOT_UPDA4E
 
     # set default values
     EXPORTER_PORT = 8787
@@ -171,7 +171,14 @@ class InverterMetrics:
             if now - self.LAST_SPOT_UPDATE > self.SPOT_SCRAPE_INTERVAL:
                 query = self.get_query(date.today(), date.today(), in_eur=True)
                 xmlResponse = asyncio.run(self._download(query))
-                self.ENERGY_PRICE = self.parse_spot_data(xmlResponse)
+
+                # exception, if the OTE website or spot prices are unavailable
+                try:
+                    self.ENERGY_PRICE = self.parse_spot_data(xmlResponse)
+                except Exception as e:
+                    print(f"Failed to update ENERGY_PRICE: {e}")
+                    self.ENERGY_PRICE = 0.0
+
                 self.LAST_SPOT_UPDATE = now 
 
         async def fetch_inverter():
