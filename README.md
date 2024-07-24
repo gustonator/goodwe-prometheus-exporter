@@ -126,6 +126,11 @@ check that you have:
 - Installed docker compose ([Docker compose installation](https://docs.docker.com.zh.xy2401.com/v17.12/compose/install/))
 </br>
 
+### Build the image
+To build the image, just go to the root folder (where the Dockerfile is) and run:
+```
+docker build -t goodwe-exporter:1.4.4 .
+```
 
 ### Install/Run
 1. edit the docker-compose.yml file and put there the correct inverter IP. (other values are optional)
