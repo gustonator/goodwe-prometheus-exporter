@@ -176,7 +176,7 @@ class InverterMetrics:
                 try:
                     self.ENERGY_PRICE = self.parse_spot_data(xmlResponse)
                 except Exception as e:
-                    print(f"Failed to update ENERGY_PRICE: {e}")
+                    print(f"Failed to update ENERGY_PRICE: Website or SPOT prices not available")
                     self.ENERGY_PRICE = 0.0
 
                 self.LAST_SPOT_UPDATE = now 
