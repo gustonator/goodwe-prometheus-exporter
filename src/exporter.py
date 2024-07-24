@@ -43,7 +43,7 @@ def checkArgs(argv):
     global PV_POWER
     global SCRAPE_SPOT_PRICE
     global SPOT_SCRAPE_INTERVAL
-    global LAST_SPOT_UPDA4E
+    global LAST_SPOT_UPDATE
 
     # set default values
     EXPORTER_PORT = 8787
