@@ -137,12 +137,19 @@ class InverterMetrics:
         async def create_collector_registers():
             inverter = await goodwe.connect(INVERTER_IP)
             runtime_data = await inverter.read_runtime_data()
+            sensors = inverter.sensors()
+            previous_sensor_ids = []
         
-            for sensor in inverter.sensors():
+            for sensor in sensors:
+                # ensure that there are no duplicate sensor id's
+                if sensor.id_ in runtime_data and sensor.id_ in previous_sensor_ids:
+                    continue
                 if sensor.id_ in runtime_data and type(runtime_data[sensor.id_]) == int or type(runtime_data[sensor.id_]) == float:
+                    previous_sensor_ids.append(sensor.id_)
                     self.g.append(Gauge(sensor.id_, sensor.name))
         
                 elif sensor.id_ in runtime_data and sensor.id_ != "timestamp" and type(runtime_data[sensor.id_]) != int:
+                    previous_sensor_ids.append(sensor.id_)
                     self.i.append(Info(sensor.id_, sensor.name))
 
             # add additional energy-price
@@ -185,9 +192,15 @@ class InverterMetrics:
             inverter = await goodwe.connect(INVERTER_IP)
             runtime_data = await inverter.read_runtime_data()
             countID = 0
-
-            for sensor in inverter.sensors():
+            sensors = inverter.sensors()
+            previous_sensor_ids = []
+        
+            for sensor in sensors:
+                # ensure that there are no duplicate sensor id's
+                if sensor.id_ in runtime_data and sensor.id_ in previous_sensor_ids:
+                    continue
                 if sensor.id_ in runtime_data and type(runtime_data[sensor.id_]) == int or type(runtime_data[sensor.id_]) == float:
+                    previous_sensor_ids.append(sensor.id_)
                     self.g[countID].set(str(runtime_data[sensor.id_]))
                     countID+=1
 
@@ -254,4 +267,3 @@ def main():
 if __name__ == "__main__":
         main()
     
-
