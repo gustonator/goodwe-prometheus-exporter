@@ -129,7 +129,7 @@ check that you have:
 ### Build the image
 To build the image, just go to the root folder (where the Dockerfile is) and run:
 ```
-docker build -t goodwe-exporter:1.4.4 .
+docker build -t goodwe-exporter:1.4.5 .
 ```
 
 ### Install/Run
