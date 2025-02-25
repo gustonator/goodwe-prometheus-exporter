@@ -14,7 +14,7 @@ more info about the python goodwe library: https://github.com/marcelblijleven/go
 
 ### Pre-requisites
 1. Configured inverter:
-Inverter must be connected to a 2.4GHz wifi network (if you have a wifi module)
+Inverter must be connected to a 2.4GHz wifi network (default wifi password is: 12345678)
 If not, you can configure it following:</br>
   1.1 Connect to a wifi network called `Solar-Wifi`. The default login is `admin` and password `admin`</br>
 	note:  default password is sometimes `12345678`</br>
